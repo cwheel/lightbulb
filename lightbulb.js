@@ -13,9 +13,15 @@ var type = {
 	Number: "number"
 }
 
+var db_name = "lightbulb";
+
 r.connect( {host: 'localhost', port: 28015}, function(err, connection) {
     if (err) throw err;
     con = connection;
+
+    r.dbList().contains(db_name).do(function (exists) {
+    	return r.branch(exists, {created: 0}, r.dbCreate(db_name));
+    });
 
     if (connectedFunction != undefined) {
     	connectedFunction();
