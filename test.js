@@ -35,7 +35,7 @@ describe('Model', function() {
 
 		it('should return a constructor for Model', function () {
 			assert.doesNotThrow(function() {
-				var cons = lightbulb.createModel("Test", {test: String});
+				var cons = lightbulb.createModel("Test", {test: lightbulb.type.String});
 				
 				if (typeof cons != "function") {
 					throw new Error("Should return a model constructor");
@@ -44,11 +44,11 @@ describe('Model', function() {
 		});
 	});
 
-	describe('#Model.Prototype', function () {
+	describe('#Model Prototype', function () {
 		var testModel;
 
 		before(function() {
-		   testModel = lightbulb.createModel("Test", {test: String});
+		   testModel = lightbulb.createModel("Test", {test: lightbulb.type.String, test2: lightbulb.type.Number});
 		});
 
 		it('should return a Model object when the constructor is called', function () {
@@ -59,6 +59,43 @@ describe('Model', function() {
 					throw new Error("Should return a model object");
 				}
 			}, Error);
+		});
+
+		it('should throw an exception when given values for non-existant keys', function () {
+			assert.throws(function() {
+				var inst = new testModel({apple: "Value"});
+			}, Error);
+
+			assert.throws(function() {
+				var inst = new testModel({test: "Value", apple: "Value"});
+			}, Error);
+		});
+
+		it('should throw an exception when given values with incorrect types for their keys', function () {
+			assert.throws(function() {
+				var inst = new testModel({test: 6});
+			}, Error);
+
+			assert.throws(function() {
+				var inst = new testModel({test: "hello", test2: "hello"});
+			}, Error);
+		});
+
+		it('should be able to retrieve values given from keys', function () {
+			var inst = new testModel({test: "hello", test2: 6});
+			
+			assert.equal("hello", inst.test);
+			assert.equal(6, inst.test2);
+		});
+
+		it('should be able to set values by key', function () {
+			var inst = new testModel({test: "hello", test2: 6});
+			
+			inst.test = "goodbye";
+			assert.equal("goodbye", inst.test);
+
+			inst.test2 = 12;
+			assert.equal(12, inst.test2);
 		});
 	});
 });
