@@ -15,26 +15,33 @@ r.connect( {host: 'localhost', port: 28015}, function(err, connection) {
     }
 });
 
-function Model() {
-	var modelParams;
-	var name;
+function Model(name, params, values) {
+	this.modelParams = params;
+	this.modelValues = values;
+	this.name = name;
 
-	this.setParams = function(newParams) {
-		modelParams = newParams;
-	};
-
-	this.setName = function(newName) {
-		name = newName;
-	};
+	
 }
 
 function createModel(name, params) {
-	//var m = new Model();
+	if (name == undefined) {
+		throw new Error("Models must be created with a name");
+	}
+
+	if (typeof name != "string") {
+		throw new Error("Names must be a string");
+	}
+
+	if (params == undefined) {
+		throw new Error("Models must be created with parameters");
+	}
+
+	if (!(params instanceof Object)) {
+		throw new Error("Parameters must be an object");
+	}
 
 	return function (values) {
-		var n = name;
-		console.log(n);
-		console.log(values);
+		return new Model(name, params, values);
 	}
 }
 
