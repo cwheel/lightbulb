@@ -1,5 +1,5 @@
 var assert = require('assert');
-var lightbulb = require('./lightbulb');
+var lightbulb = require('./lib/lightbulb')({db: 'test'});
 
 lightbulb.onConnected(function() {
 	run();
@@ -35,7 +35,7 @@ describe('Model', function() {
 
 		it('should return a constructor for Model', function () {
 			assert.doesNotThrow(function() {
-				var cons = lightbulb.createModel("Test", {test: lightbulb.type.String});
+				var cons = lightbulb.createModel("Test", {test: lightbulb.types.String});
 				
 				if (typeof cons != "function") {
 					throw new Error("Should return a model constructor");
@@ -48,7 +48,7 @@ describe('Model', function() {
 		var testModel;
 
 		before(function() {
-		   testModel = lightbulb.createModel("Test", {test: lightbulb.type.String, test2: lightbulb.type.Number});
+		   testModel = lightbulb.createModel("Test", {test: lightbulb.types.String, test2: lightbulb.types.Number});
 		});
 
 		it('should return a Model object when the constructor is called', function () {
