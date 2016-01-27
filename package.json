@@ -2,6 +2,7 @@
     "name": "lightbulb",
 
     "dependencies": {
-        "rethinkdb": "latest"
+        "rethinkdb": "latest",
+        "q": "latest"
     }
 }

@@ -1,8 +1,29 @@
 var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
 
+var apple, orange;
+
 lightbulb.onConnected(function() {
-	run();
+	apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
+		apple.ready(function() {
+			orange = lightbulb.createModel("Orange", {weight: lightbulb.types.Number, origin: lightbulb.types.String});
+			
+			orange.ready(function() {
+				console.log(apple);
+				run();
+			});
+	});
+});
+
+before(function() {
+	apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
+		apple.ready(function() {
+			orange = lightbulb.createModel("Orange", {weight: lightbulb.types.Number, origin: lightbulb.types.String});
+			
+			orange.ready(function() {
+				console.log(apple);
+			});
+	});
 });
 
 describe('Setup', function() {
@@ -21,7 +42,7 @@ describe('Model', function() {
 			}, Error);
 		});
 
-		it('should throw an error when created with anything but a string', function () {
+		it('should throw an error when created with anything but a string name', function () {
 			assert.throws(function() {
 				lightbulb.createModel({test: "value"});
 			}, Error);
@@ -35,25 +56,21 @@ describe('Model', function() {
 
 		it('should return a constructor for Model', function () {
 			assert.doesNotThrow(function() {
-				var cons = lightbulb.createModel("Test", {test: lightbulb.types.String});
-				
-				if (typeof cons != "function") {
-					throw new Error("Should return a model constructor");
-				}
+				var cons = lightbulb.createModel("ModelTest", {test: lightbulb.types.String});
+
+				cons.ready(function() {
+					if (typeof cons != "function") {
+						throw new Error("Should return a model constructor");
+					}
+				});
 			}, Error);
 		});
 	});
 
 	describe('#Model Prototype', function () {
-		var testModel;
-
-		before(function() {
-		   testModel = lightbulb.createModel("Test", {test: lightbulb.types.String, test2: lightbulb.types.Number});
-		});
-
 		it('should return a Model object when the constructor is called', function () {
 			assert.doesNotThrow(function() {
-				var inst = new testModel({test: "Value"});
+				var inst = new Apple({color: "red"});
 				
 				if (typeof inst != "object") {
 					throw new Error("Should return a model object");
@@ -63,39 +80,39 @@ describe('Model', function() {
 
 		it('should throw an exception when given values for non-existant keys', function () {
 			assert.throws(function() {
-				var inst = new testModel({apple: "Value"});
+				var inst = new Apple({taste: "sweet"});
 			}, Error);
 
 			assert.throws(function() {
-				var inst = new testModel({test: "Value", apple: "Value"});
+				var inst = new Apple({color: "red", taste: "sweet"});
 			}, Error);
 		});
 
 		it('should throw an exception when given values with incorrect types for their keys', function () {
 			assert.throws(function() {
-				var inst = new testModel({test: 6});
+				var inst = new Orange({weight: "6"});
 			}, Error);
 
 			assert.throws(function() {
-				var inst = new testModel({test: "hello", test2: "hello"});
+				var inst = new Orange({origin: "Florida", weight: "6"});
 			}, Error);
 		});
 
 		it('should be able to retrieve values given from keys', function () {
-			var inst = new testModel({test: "hello", test2: 6});
+			var inst = new Apple({color: "red", type: "Fuji"});
 			
-			assert.equal("hello", inst.test);
-			assert.equal(6, inst.test2);
+			assert.equal("red", inst.color);
+			assert.equal("Fuji", inst.type);
 		});
 
 		it('should be able to set values by key', function () {
-			var inst = new testModel({test: "hello", test2: 6});
+			var inst = new Apple({color: "red", type: "Fuji"});
 			
-			inst.test = "goodbye";
-			assert.equal("goodbye", inst.test);
+			inst.color = "green";
+			assert.equal("green", inst.color);
 
-			inst.test2 = 12;
-			assert.equal(12, inst.test2);
+			inst.type = "Granny Smith";
+			assert.equal("Granny Smith", inst.type);
 		});
 	});
 });
