@@ -57,7 +57,7 @@ describe('Model Factory (Create)', function() {
 });
 
 describe('Model', function() {
-	describe('#Model Prototype', function () {
+	describe('#prototype', function () {
 		it('should return a Model object when the constructor is called', function () {
 			assert.doesNotThrow(function() {
 				var inst = new Apple({color: "red"});
@@ -136,6 +136,40 @@ describe('Model', function() {
 					assert.equal("yellow", nextSaved);
 					assert.equal(saved.id, nextSaved.id);
 				})
+			});
+		});
+	});
+});
+
+describe('Model Factory (Fetch)', function() {
+	var id;
+
+	before(function(done) {
+		var inst = new Orange({weight: 1.5, origin: "Chile"});
+
+		inst.save().then(function(saved) {
+			id = saved.id;
+			done();
+		});
+	});
+
+	describe('#get()', function() {
+		it('should fetch a model given an id', function () {
+			Orange.get(id).then(function(model) {
+				assert.notEqual(undefined, model);
+			});
+		});
+
+		it('should fetch the specified model given an id', function () {
+			Orange.get(id).then(function(model) {
+				assert.equal(1.5, model.weight);
+				assert.equal("Chile", model.origin);
+			});
+		});
+
+		it('should return undefined if the id is invalid', function () {
+			Orange.get('not-an-id').then(function(model) {
+				assert.equal(undefined, model);
 			});
 		});
 	});
