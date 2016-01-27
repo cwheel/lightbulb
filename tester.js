@@ -1,7 +1,23 @@
-var lightbulb = require('./lightbulb');
+var lightbulb = require('./lib/lightbulb')({db: 't'});
 
+lightbulb.onConnected(function() {
+	var cons = lightbulb.createModel("Test", {test: lightbulb.types.String});
 
-var cons = lightbulb.createModel("Test", {test: lightbulb.type.String});
-var a = new cons({test: 7});
+	cons.ready(function() {
+		var a = new cons({test: "Hello World"});
+		console.log(typeof a);
 
-console.log(typeof 8);
+		a.save().then(function(saved) {
+			console.log(saved);
+
+			var id = saved.id;
+
+			cons.findOne({test: "Hello World"}).then(function(testObj) {
+				console.log(testObj);
+
+				testObj.remove();
+			});
+
+		});
+	});
+});
