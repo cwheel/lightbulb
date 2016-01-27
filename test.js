@@ -139,6 +139,40 @@ describe('Model', function() {
 			});
 		});
 	});
+
+	describe('#remove()', function () {
+		var inst1, inst2;
+
+		before(function(done) {
+			var o1 = new Orange({weight: 1.5, origin: "Chile"});
+			var o2 = new Orange({weight: 3, origin: "California"});
+
+			o1.save().then(function(saved) {
+				inst1 = saved;
+
+				o2.save().then(function(saved) {
+					inst2 = saved;
+
+					done();
+				});
+			});
+		});
+
+		it('should actually remove the model', function () {
+			inst1.remove(function(removed) {
+				inst1.get(removed.id).then(function(fetched) {
+					assert.equal(undefined, fetched);
+				});
+			});
+		});
+
+		it('should return correct model upon removal', function () {
+			inst2.remove(function(removed) {
+				assert.equal(3, removed.weight);
+				assert.equal("California", removed.origin);
+			});
+		});
+	});
 });
 
 describe('Model Factory (Fetch)', function() {
@@ -169,6 +203,27 @@ describe('Model Factory (Fetch)', function() {
 
 		it('should return undefined if the id is invalid', function () {
 			Orange.get('not-an-id').then(function(model) {
+				assert.equal(undefined, model);
+			});
+		});
+	});
+
+	describe('#findOne()', function() {
+		it('should fetch a model', function () {
+			Orange.findOne({weight: 1.5}).then(function(model) {
+				assert.notEqual(undefined, model);
+			});
+		});
+
+		it('should fetch a model matching the filter', function () {
+			Orange.findOne({weight: 1.5}).then(function(model) {
+				assert.equal(1.5, model.weight);
+				assert.equal("Chile", model.origin);
+			});
+		});
+
+		it('should return undefined with invalid filter', function () {
+			Orange.findOne({weight: 25}).then(function(model) {
 				assert.equal(undefined, model);
 			});
 		});
