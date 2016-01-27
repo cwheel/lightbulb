@@ -22,7 +22,7 @@ describe('Setup', function() {
 	});
 });
 
-describe('Model', function() {
+describe('Model Factory (Create)', function() {
 	describe('#createModel()', function () {
 		it('should throw an error when created with nothing', function () {
 			assert.throws(function() {
@@ -54,7 +54,9 @@ describe('Model', function() {
 			}, Error);
 		});
 	});
+});
 
+describe('Model', function() {
 	describe('#Model Prototype', function () {
 		it('should return a Model object when the constructor is called', function () {
 			assert.doesNotThrow(function() {
@@ -101,6 +103,52 @@ describe('Model', function() {
 
 			inst.type = "Granny Smith";
 			assert.equal("Granny Smith", inst.type);
+		});
+	});
+
+	describe('#save()', function () {
+		it('should return the object with an id', function () {
+			var inst = new Apple({color: "red", type: "Fuji"});
+
+			inst.save().then(function(saved) {
+				assert.notEqual(undefined, saved);
+				assert.notEqual(undefined, saved.id);
+			});
+		});
+
+		it('should throw an error when told to save invalid values', function () {
+			assert.throws(function() {
+				var inst = new Apple({color: "red", type: "Fuji"});
+
+				inst.color = 6;
+
+				inst.save().then(function(saved) {});
+			}, Error);
+		});
+
+		it('should update a model if the model has an id', function () {
+			var inst = new Apple({color: "red", type: "Fuji"});
+
+			inst.save().then(function(saved) {
+				saved.color = "yellow";
+
+				saved.save().then(function(nextSaved) {
+					assert.equal("yellow", nextSaved);
+					assert.equal(saved.id, nextSaved.id);
+				})
+			});
+		});
+
+		it('should throw error if unable to perform the save or update', function () {
+			assert.throws(function() {
+				var inst = new Apple({color: "red", type: "Fuji"});
+
+				inst.save().then(function(saved) {
+					saved.id = "not-an-id";
+
+					saved.save();
+				});
+			}, Error);
 		});
 	});
 });

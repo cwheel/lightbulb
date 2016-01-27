@@ -5,19 +5,17 @@ lightbulb.onConnected(function() {
 
 	cons.ready(function() {
 		var a = new cons({test: "Hello World"});
-		console.log(typeof a);
 
 		a.save().then(function(saved) {
 			console.log(saved);
 
-			var id = saved.id;
+			saved.test = "hi";
+			saved.id = "4723423";
 
-			cons.findOne({test: "Hello World"}).then(function(testObj) {
-				console.log(testObj);
-
-				testObj.remove();
-			});
-
+			saved.save().then(function(c) {
+				console.log(c);
+				c.remove();
+			})
 		});
 	});
 });
