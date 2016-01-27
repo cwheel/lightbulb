@@ -6,16 +6,13 @@ lightbulb.onConnected(function() {
 	cons.ready(function() {
 		var a = new cons({test: "Hello World"});
 
+
 		a.save().then(function(saved) {
-			console.log(saved);
+			saved.id = "not-an-id";
 
-			saved.test = "hi";
-			saved.id = "4723423";
-
-			saved.save().then(function(c) {
-				console.log(c);
-				c.remove();
-			})
+			saved.save().then(function(next) {
+				console.log(next);
+			});
 		});
 	});
 });

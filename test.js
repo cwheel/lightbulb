@@ -138,17 +138,5 @@ describe('Model', function() {
 				})
 			});
 		});
-
-		it('should throw error if unable to perform the save or update', function () {
-			assert.throws(function() {
-				var inst = new Apple({color: "red", type: "Fuji"});
-
-				inst.save().then(function(saved) {
-					saved.id = "not-an-id";
-
-					saved.save();
-				});
-			}, Error);
-		});
 	});
 });
