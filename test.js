@@ -278,6 +278,28 @@ describe('Model Factory (Fetch)', function() {
 		});
 	});
 
+	describe('#find()', function() {
+		it('should fetch a model set', function () {
+			Orange.find({origin: "Florida"}).then(function(set) {
+				assert.notEqual(undefined, set);
+			});
+		});
+
+		it('should fetch a model set matching the filter', function () {
+			Orange.find({origin: "Florida"}).then(function(set) {
+				set.forEach(function(item) {
+					assert.equal("Florida", item.origin);
+				});
+			});
+		});
+
+		it('should return empty set with invalid filter', function () {
+			Orange.find({weight: 25}).then(function(set) {
+				assert.equal(0, set.length);
+			});
+		});
+	});
+
 	describe('#findOne()', function() {
 		it('should fetch a model', function () {
 			Orange.findOne({weight: 1.5}).then(function(model) {
