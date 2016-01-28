@@ -1,5 +1,6 @@
 var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
+var ModelSet = require('./lib/modelSet');
 
 var Apple, Orange;
 
@@ -189,6 +190,57 @@ describe('Model', function() {
 				assert.equal(3, removed.weight);
 				assert.equal("California", removed.origin);
 			});
+		});
+	});
+});
+
+describe('ModelSet', function() {
+	var set, inst1, inst2, inst3;
+
+	before(function(done) {
+		set = new ModelSet("Orange", lightbulb.connection, lightbulb.args);
+
+		inst1 = new Orange({weight: 1.6, origin: "Florida"});
+		inst2 = new Orange({weight: 1.7, origin: "Florida"});
+		inst3 = new Orange({weight: 1.8, origin: "Florida"});
+
+		inst1.save().then(function(saved1) {
+			inst2.save().then(function(saved2) {
+				inst3.save().then(function(saved3) {
+					done();
+				});
+			});
+		});
+	});
+
+	describe('#appendModel()', function() {
+		it('should not throw error when called with modelFactory parameters', function () {
+			assert.doesNotThrow(function() {
+				set.appendModel(inst1);
+				set.appendModel(inst2);
+				set.appendModel(inst3);
+			});
+		});
+	});
+
+	describe('#length', function() {
+		it('should have length of three', function () {
+			assert.equal(3, set.length);
+		});
+	});
+
+	describe('#forEach()', function() {
+		it('should make callback three times with valid objects', function () {
+			var loops = 0;
+
+			set.forEach(function(item) {
+				assert.notEqual(undefined, item);
+				assert.equal("Florida", item.origin);
+
+				loops++;
+			});
+
+			assert.equal(3, loops);
 		});
 	});
 });
