@@ -1,6 +1,6 @@
 var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
-var ModelSet = require('./lib/modelSet');
+var DocumentSet = require('./lib/documentSet');
 
 var Apple, Orange;
 
@@ -41,7 +41,7 @@ describe('Setup', function() {
 	});
 });
 
-describe('Model Factory (Create)', function() {
+describe('Document Factory (Create)', function() {
 	describe('#createModel()', function () {
 		it('should throw an error when created with nothing', function () {
 			assert.throws(function() {
@@ -61,13 +61,13 @@ describe('Model Factory (Create)', function() {
 			}, Error);
 		});
 
-		it('should return a constructor for Model', function () {
+		it('should return a constructor for Document', function () {
 			assert.doesNotThrow(function() {
 				var cons = lightbulb.createModel("ModelTest", {test: lightbulb.types.String});
 
 				cons.ready(function() {
 					if (typeof cons != "function") {
-						throw new Error("Should return a model constructor");
+						throw new Error("Should return a document constructor");
 					}
 				});
 			}, Error);
@@ -75,14 +75,14 @@ describe('Model Factory (Create)', function() {
 	});
 });
 
-describe('Model', function() {
+describe('Document', function() {
 	describe('#prototype', function () {
-		it('should return a Model object when the constructor is called', function () {
+		it('should return a Document object when the constructor is called', function () {
 			assert.doesNotThrow(function() {
 				var inst = new Apple({color: "red"});
 				
 				if (typeof inst != "object") {
-					throw new Error("Should return a model object");
+					throw new Error("Should return a document");
 				}
 			}, Error);
 		});
@@ -126,7 +126,7 @@ describe('Model', function() {
 	});
 
 	describe('#save()', function () {
-		it('should return the object with an id', function () {
+		it('should return the document with an id', function () {
 			var inst = new Apple({color: "red", type: "Fuji"});
 
 			inst.save().then(function(saved) {
@@ -145,7 +145,7 @@ describe('Model', function() {
 			}, Error);
 		});
 
-		it('should update a model if the model has an id', function () {
+		it('should update a document if the document has an id', function () {
 			var inst = new Apple({color: "red", type: "Fuji"});
 
 			inst.save().then(function(saved) {
@@ -177,7 +177,7 @@ describe('Model', function() {
 			});
 		});
 
-		it('should actually remove the model', function () {
+		it('should actually remove the document', function () {
 			inst1.remove(function(removed) {
 				inst1.get(removed.id).then(function(fetched) {
 					assert.equal(undefined, fetched);
@@ -185,7 +185,7 @@ describe('Model', function() {
 			});
 		});
 
-		it('should return correct model upon removal', function () {
+		it('should return correct document upon removal', function () {
 			inst2.remove(function(removed) {
 				assert.equal(3, removed.weight);
 				assert.equal("California", removed.origin);
@@ -194,11 +194,11 @@ describe('Model', function() {
 	});
 });
 
-describe('ModelSet', function() {
+describe('DocumentSet', function() {
 	var set, inst1, inst2, inst3;
 
 	before(function(done) {
-		set = new ModelSet("Orange", lightbulb.connection, lightbulb.args);
+		set = new DocumentSet("Orange", lightbulb.connection, lightbulb.args);
 
 		inst1 = new Orange({weight: 1.6, origin: "Florida"});
 		inst2 = new Orange({weight: 1.7, origin: "Florida"});
@@ -213,12 +213,12 @@ describe('ModelSet', function() {
 		});
 	});
 
-	describe('#appendModel()', function() {
-		it('should not throw error when called with modelFactory parameters', function () {
+	describe('#appendDocument()', function() {
+		it('should not throw error when called with documentFactory parameters', function () {
 			assert.doesNotThrow(function() {
-				set.appendModel(inst1);
-				set.appendModel(inst2);
-				set.appendModel(inst3);
+				set.appendDocument(inst1);
+				set.appendDocument(inst2);
+				set.appendDocument(inst3);
 			});
 		});
 	});
@@ -245,7 +245,7 @@ describe('ModelSet', function() {
 	});
 });
 
-describe('Model Factory (Fetch)', function() {
+describe('Document Factory (Fetch)', function() {
 	var id;
 
 	before(function(done) {
@@ -258,34 +258,44 @@ describe('Model Factory (Fetch)', function() {
 	});
 
 	describe('#get()', function() {
-		it('should fetch a model given an id', function () {
-			Orange.get(id).then(function(model) {
-				assert.notEqual(undefined, model);
+		it('should fetch a document given an id', function () {
+			Orange.get(id).then(function(doc) {
+				assert.notEqual(undefined, doc);
 			});
 		});
 
-		it('should fetch the specified model given an id', function () {
-			Orange.get(id).then(function(model) {
-				assert.equal(1.5, model.weight);
-				assert.equal("Chile", model.origin);
+		it('should fetch the specified document given an id', function () {
+			Orange.get(id).then(function(doc) {
+				assert.equal(1.5, doc.weight);
+				assert.equal("Chile", doc.origin);
 			});
 		});
 
 		it('should return undefined if the id is invalid', function () {
-			Orange.get('not-an-id').then(function(model) {
-				assert.equal(undefined, model);
+			Orange.get('not-an-id').then(function(doc) {
+				assert.equal(undefined, doc);
 			});
 		});
 	});
 
 	describe('#find()', function() {
-		it('should fetch a model set', function () {
+		it('should throw an error when given an undefined filter', function () {
+			assert.throws(function() {
+				Orange.find();
+			});
+
+			assert.throws(function() {
+				Orange.find(undefined);
+			});
+		});
+		
+		it('should fetch a document set', function () {
 			Orange.find({origin: "Florida"}).then(function(set) {
 				assert.notEqual(undefined, set);
 			});
 		});
 
-		it('should fetch a model set matching the filter', function () {
+		it('should fetch a document set matching the filter', function () {
 			Orange.find({origin: "Florida"}).then(function(set) {
 				set.forEach(function(item) {
 					assert.equal("Florida", item.origin);
@@ -301,22 +311,22 @@ describe('Model Factory (Fetch)', function() {
 	});
 
 	describe('#findOne()', function() {
-		it('should fetch a model', function () {
-			Orange.findOne({weight: 1.5}).then(function(model) {
-				assert.notEqual(undefined, model);
+		it('should fetch a document', function () {
+			Orange.findOne({weight: 1.5}).then(function(doc) {
+				assert.notEqual(undefined, doc);
 			});
 		});
 
-		it('should fetch a model matching the filter', function () {
-			Orange.findOne({weight: 1.5}).then(function(model) {
-				assert.equal(1.5, model.weight);
-				assert.equal("Chile", model.origin);
+		it('should fetch a document matching the filter', function () {
+			Orange.findOne({weight: 1.5}).then(function(doc) {
+				assert.equal(1.5, doc.weight);
+				assert.equal("Chile", doc.origin);
 			});
 		});
 
 		it('should return undefined with invalid filter', function () {
-			Orange.findOne({weight: 25}).then(function(model) {
-				assert.equal(undefined, model);
+			Orange.findOne({weight: 25}).then(function(doc) {
+				assert.equal(undefined, doc);
 			});
 		});
 	});
