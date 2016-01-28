@@ -4,5 +4,8 @@
     "dependencies": {
         "rethinkdb": "latest",
         "q": "latest"
+    },
+    "scripts": {
+      "test": "mocha --delay"
     }
 }
