@@ -7,8 +7,10 @@ lightbulb.onConnected(function() {
 		var a = new cons({test: "Hello World"});
 
 		a.save().then(function(saved) {
-			cons.findOne({test: "Hello World"}).then(function(found) {
-				console.log(found);
+			cons.find({test: "Hello World"}).then(function(found) {
+				found.remove().then(function(status) {
+					console.log(status);
+				});
 			});
 		});
 	});
