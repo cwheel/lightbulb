@@ -20,6 +20,24 @@ describe('Setup', function() {
 			assert.notEqual(undefined, lightbulb.connection());
 		});
 	});
+
+	describe('#types', function () {
+		it('should return a dictionary of acceptable model key types', function () {
+			assert.notEqual(undefined, lightbulb.types);
+		});
+
+		it('should have a String type', function () {
+			assert.equal("string", lightbulb.types.String);
+		});
+
+		it('should have a Number type', function () {
+			assert.equal("number", lightbulb.types.Number);
+		});
+
+		it('should have an Object type', function () {
+			assert.equal("object", lightbulb.types.Object);
+		});
+	});
 });
 
 describe('Model Factory (Create)', function() {

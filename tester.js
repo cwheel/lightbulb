@@ -6,12 +6,9 @@ lightbulb.onConnected(function() {
 	cons.ready(function() {
 		var a = new cons({test: "Hello World"});
 
-
 		a.save().then(function(saved) {
-			saved.id = "not-an-id";
-
-			saved.save().then(function(next) {
-				console.log(next);
+			cons.findOne({test: "Hello World"}).then(function(found) {
+				console.log(found);
 			});
 		});
 	});
