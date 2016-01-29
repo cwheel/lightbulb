@@ -247,6 +247,16 @@ describe('DocumentSet', function() {
 			assert.equal(3, loops);
 		});
 	});
+
+	describe('#update()', function() {
+		it('should modify all objects in set', function () {
+			var loops = 0;
+
+			set.update({origin: "California"}).then(function(updated) {
+
+			});
+		});
+	});
 });
 
 describe('Document Factory (Fetch)', function() {
