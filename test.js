@@ -38,6 +38,10 @@ describe('Setup', function() {
 		it('should have an Object type', function () {
 			assert.equal("object", lightbulb.types.Object);
 		});
+
+		it('should have an Array type', function () {
+			assert.equal("array", lightbulb.types.Array);
+		});
 	});
 });
 

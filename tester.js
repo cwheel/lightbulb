@@ -7,8 +7,8 @@ lightbulb.onConnected(function() {
 		var a = new cons({test: "Hello World"});
 
 		a.save().then(function(saved) {
-			cons.find("fsdfs").then(function(found) {
-				found.remove().then(function(status) {
+			cons.find({}).then(function(found) {
+				found.update({test: "Goodbye World!"}).then(function(status) {
 					console.log(status);
 				});
 			});
