@@ -198,67 +198,6 @@ describe('Document', function() {
 	});
 });
 
-describe('DocumentSet', function() {
-	var set, inst1, inst2, inst3;
-
-	before(function(done) {
-		set = new DocumentSet("Orange", lightbulb.connection, lightbulb.args);
-
-		inst1 = new Orange({weight: 1.6, origin: "Florida"});
-		inst2 = new Orange({weight: 1.7, origin: "Florida"});
-		inst3 = new Orange({weight: 1.8, origin: "Florida"});
-
-		inst1.save().then(function(saved1) {
-			inst2.save().then(function(saved2) {
-				inst3.save().then(function(saved3) {
-					done();
-				});
-			});
-		});
-	});
-
-	describe('#appendDocument()', function() {
-		it('should not throw error when called with documentFactory parameters', function () {
-			assert.doesNotThrow(function() {
-				set.appendDocument(inst1);
-				set.appendDocument(inst2);
-				set.appendDocument(inst3);
-			});
-		});
-	});
-
-	describe('#length', function() {
-		it('should have length of three', function () {
-			assert.equal(3, set.length);
-		});
-	});
-
-	describe('#forEach()', function() {
-		it('should make callback three times with valid objects', function () {
-			var loops = 0;
-
-			set.forEach(function(item) {
-				assert.notEqual(undefined, item);
-				assert.equal("Florida", item.origin);
-
-				loops++;
-			});
-
-			assert.equal(3, loops);
-		});
-	});
-
-	describe('#update()', function() {
-		it('should modify all objects in set', function () {
-			var loops = 0;
-
-			set.update({origin: "California"}).then(function(updated) {
-
-			});
-		});
-	});
-});
-
 describe('Document Factory (Fetch)', function() {
 	var id;
 
@@ -341,6 +280,85 @@ describe('Document Factory (Fetch)', function() {
 		it('should return undefined with invalid filter', function () {
 			Orange.findOne({weight: 25}).then(function(doc) {
 				assert.equal(undefined, doc);
+			});
+		});
+	});
+});
+
+describe('DocumentSet', function() {
+	var set, inst1, inst2, inst3;
+
+	before(function(done) {
+		set = new DocumentSet("Orange", lightbulb.connection, lightbulb.args);
+
+		inst1 = new Orange({weight: 1.6, origin: "Florida"});
+		inst2 = new Orange({weight: 1.7, origin: "Florida"});
+		inst3 = new Orange({weight: 1.8, origin: "Florida"});
+
+		inst1.save().then(function(saved1) {
+			inst2.save().then(function(saved2) {
+				inst3.save().then(function(saved3) {
+					done();
+				});
+			});
+		});
+	});
+
+	describe('#appendDocument()', function() {
+		it('should not throw error when called with documentFactory parameters', function () {
+			assert.doesNotThrow(function() {
+				set.appendDocument(inst1);
+				set.appendDocument(inst2);
+				set.appendDocument(inst3);
+			});
+		});
+	});
+
+	describe('#length', function() {
+		it('should have length of three', function () {
+			assert.equal(3, set.length);
+		});
+	});
+
+	describe('#forEach()', function() {
+		it('should make callback three times with valid objects', function () {
+			var loops = 0;
+
+			set.forEach(function(item) {
+				assert.notEqual(undefined, item);
+				assert.equal("Florida", item.origin);
+
+				loops++;
+			});
+
+			assert.equal(3, loops);
+		});
+	});
+
+	describe('#update()', function() {
+		it('should throw an error using a non-fetched set', function () {
+			assert.throws(function() {
+				set.update({origin: "California"}).then(function(updated) {
+					assert.equal(true, updated);
+				});
+			});
+		});
+
+		it('should modify all objects in set', function () {
+			Orange.find({}).then(function(results) {
+				results.update({origin: "California"}).then(function(updated) {
+					assert.equal(true, updated);
+				});
+			});
+		});
+
+		it('should modify internal set objects', function () {
+			Orange.find({}).then(function(results) {
+				results.update({origin: "Chile"}).then(function(updated) {
+					results.forEach(function(item) {
+						assert.equals("Chile", item.origin);
+					});
+				});
 			});
 		});
 	});
