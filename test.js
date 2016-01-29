@@ -362,4 +362,42 @@ describe('DocumentSet', function() {
 			});
 		});
 	});
+
+	describe('#remove()', function() {
+		it('should throw an error using a non-fetched set', function () {
+			assert.throws(function() {
+				set.remove().then(function(updated) {
+					assert.equal(true, updated);
+				});
+			});
+		});
+
+		it('should remove all objects in set', function () {
+			Orange.find({}).then(function(results) {
+				results.remove().then(function(updated) {
+					assert.equal(true, updated);
+				});
+			});
+		});
+
+		it('should remove internal set objects', function () {
+			var inst1 = new Orange({weight: 1.6, origin: "Florida"});
+			var inst2 = new Orange({weight: 1.7, origin: "Florida"});
+			var inst3 = new Orange({weight: 1.8, origin: "Florida"});
+
+			inst1.save().then(function(saved1) {
+				inst2.save().then(function(saved2) {
+					inst3.save().then(function(saved3) {
+						Orange.find({}).then(function(results) {
+							results.remove().then(function(updated) {
+								for (var i = 0; i < 3; i++) {
+									assert.equal(undefined, results[i]);
+								}
+							});
+						});
+					});
+				});
+			});
+		});
+	});
 });
