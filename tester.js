@@ -5,7 +5,7 @@ lightbulb.onConnected(function() {
 
 	cons.ready(function() {
 		var a = new cons({test: "Hello World"});
-
+		console.log(a);
 		a.save().then(function(saved) {
 			console.log(saved);
 		});
