@@ -1,13 +1,23 @@
-var lightbulb = require('./lib/lightbulb')({db: 't'});
+var lightbulb = require('./lib/lightbulb')({db: 'tester'});
 
 lightbulb.onConnected(function() {
-	var cons = lightbulb.createModel("Test", {test: lightbulb.types.String});
+	var planet = lightbulb.createModel("Planet", {name: lightbulb.types.String, gravity: lightbulb.types.Number});
+	var star = lightbulb.createModel("Star", {name: lightbulb.types.String, color: lightbulb.types.String});
 
-	cons.ready(function() {
-		var a = new cons({test: "Hello World"});
+	planet.hasMany(star, "stars");
 
-		a.save().then(function(saved) {
+	planet.ready(function() {
+		var earth = new planet({name: "Earth", gravity: 9.8});
+		var sun = new star({name: "Sun", color: "yellow"});
+
+		earth.save().then(function(saved) {
+			saved.stars.appendDocument(sun);
+
 			console.log(saved);
+
+			saved.save(function(saved2) {
+				console.log(saved2);
+			});
 		});
 	});
 });
