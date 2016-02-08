@@ -11,13 +11,14 @@ lightbulb.onConnected(function() {
 		var sun = new star({name: "Sun", color: "yellow"});
 
 		earth.save().then(function(saved) {
-			//saved.stars.appendDocument(sun);
+			console.log("=> Returned", saved);
+			saved.stars.appendDocument(sun);
 
-			console.log(saved);
-/*
+			console.log("=> Modified", saved);
+
 			saved.save(function(saved2) {
-				console.log(saved2);
-			});*/
+				console.log("=> Relation Added", saved2);
+			});
 		});
 	});
 });
