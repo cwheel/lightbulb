@@ -15,14 +15,16 @@ lightbulb.onConnected(function() {
 
 		var lander = new spacecraft({name: "Lunar Lander", year: "1988"});
 
-	//	moon.spacecraft.appendDocument(lander);
-
 		earth.save().then(function(saved) {
 			saved.stars.appendDocument(sun);
 			saved.stars.appendDocument(moon);
 
 			saved.save().then(function(saved2) {
-				console.log("=> Child document added", saved2);
+				saved2.stars[0].spacecraft.appendDocument(lander);
+				
+				saved2.save().then(function(saved3) {
+					console.log("=> Child document added", saved3);
+				});
 			});
 		});
 	});
