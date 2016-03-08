@@ -1,5 +1,5 @@
 var lightbulb = require('./lib/lightbulb')({db: 'tester'});
-
+var DocumentSet = require('./lib/documentSet.js');
 lightbulb.onConnected(function() {
 	var planet = lightbulb.createModel("Planet", {name: lightbulb.types.String, gravity: lightbulb.types.Number});
 	var star = lightbulb.createModel("Star", {name: lightbulb.types.String, color: lightbulb.types.String});
@@ -22,25 +22,22 @@ lightbulb.onConnected(function() {
 		var lander = new spacecraft({name: "Lunar Lander", year: "1988"});
 		var lander2 = new spacecraft({name: "Lunar Lander 2", year: "1989"});
 
-		earth.save().then(function(saved) {
-			saved.stars.appendDocument(sun);
-			saved.stars.appendDocument(moon);
+		var set, inst1, inst2, inst3;
 
-			saved.save().then(function(saved2) {
-				console.log("STARS",saved2.stars)
-				saved2.stars[0].spacecraft.appendDocument(lander);
-				saved2.stars[0].spacecraft.appendDocument(lander2);
-				console.log("STARS2",saved2.stars);
+			set = new DocumentSet("Orange", lightbulb.connection, lightbulb.args);
 
-				saved2.save().then(function(saved3) {
-					console.log("=> Child document added", saved3);
-					console.log("=> Spacecraft on sun", saved3.stars[1]);
+			inst1 = new star({name: "Sun1", color: "yellow"});
+			inst2 = new star({name: "Sun2", color: "yellow"});
+			inst3 = new star({name: "Sun3", color: "yellow"});
 
-					planet.get(saved3.id).then(function(earth) {
-			            console.log("=> Spacecraft on sun", earth.stars[1]);
-			        });
+			inst1.save().then(function(saved1) {
+				inst2.save().then(function(saved2) {
+					inst3.save().then(function(saved3) {
+						console.log(saved3)
+					});
 				});
 			});
-		});
+
+			set.appendDocument(inst1);
 	});
 });
