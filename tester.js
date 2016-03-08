@@ -9,7 +9,10 @@ lightbulb.onConnected(function() {
 	star.hasMany(spacecraft, "spacecraft");
 
 	planet.ready(function() {
-		var earth = new planet({name: "Earth", gravity: 9.8});
+		planet.get("89bf730e-9e18-44c0-8562-4d3abcfac46b").then(function(earth) {
+            console.log(earth);
+        })
+        /*var earth = new planet({name: "Earth", gravity: 9.8});
 		var sun = new star({name: "Sun", color: "yellow"});
 		var moon = new star({name: "Moon", color: "white"});
 
@@ -22,10 +25,11 @@ lightbulb.onConnected(function() {
 			saved.save().then(function(saved2) {
 				saved2.stars[0].spacecraft.appendDocument(lander);
 				
+                console.log("============> Saving Three.....");
 				saved2.save().then(function(saved3) {
 					console.log("=> Child document added", saved3);
 				});
 			});
-		});
+		});*/
 	});
 });
