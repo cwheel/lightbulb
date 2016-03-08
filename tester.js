@@ -9,27 +9,38 @@ lightbulb.onConnected(function() {
 	star.hasMany(spacecraft, "spacecraft");
 
 	planet.ready(function() {
-		planet.get("89bf730e-9e18-44c0-8562-4d3abcfac46b").then(function(earth) {
-            console.log(earth);
-        })
-        /*var earth = new planet({name: "Earth", gravity: 9.8});
+		/*planet.get('deb26274-c39c-4949-bbf8-ab3635721e36').then(function(earth) {
+			console.log("++++++++++++++++++++++++++++++++++++++++++++++++++++")
+            console.log("EARTH", earth);
+            console.log("Ships", earth.stars[1].spacecraft);
+        });*/
+        
+        var earth = new planet({name: "Earth", gravity: 9.8});
 		var sun = new star({name: "Sun", color: "yellow"});
 		var moon = new star({name: "Moon", color: "white"});
 
 		var lander = new spacecraft({name: "Lunar Lander", year: "1988"});
+		var lander2 = new spacecraft({name: "Lunar Lander 2", year: "1989"});
 
 		earth.save().then(function(saved) {
 			saved.stars.appendDocument(sun);
 			saved.stars.appendDocument(moon);
 
 			saved.save().then(function(saved2) {
+				console.log("STARS",saved2.stars)
 				saved2.stars[0].spacecraft.appendDocument(lander);
-				
-                console.log("============> Saving Three.....");
+				saved2.stars[0].spacecraft.appendDocument(lander2);
+				console.log("STARS2",saved2.stars);
+
 				saved2.save().then(function(saved3) {
 					console.log("=> Child document added", saved3);
+					console.log("=> Spacecraft on sun", saved3.stars[1]);
+
+					planet.get(saved3.id).then(function(earth) {
+			            console.log("=> Spacecraft on sun", earth.stars[1]);
+			        });
 				});
 			});
-		});*/
+		});
 	});
 });
