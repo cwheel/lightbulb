@@ -2,7 +2,7 @@ var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
 var DocumentSet = require('./lib/documentSet');
 
-var Apple, Orange;
+var Apple, Orange, Ship, Container, Item;
 
 lightbulb.onConnected(function() {
 	Apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
@@ -10,7 +10,17 @@ lightbulb.onConnected(function() {
 			Orange = lightbulb.createModel("Orange", {weight: lightbulb.types.Number, origin: lightbulb.types.String});
 			
 			Orange.ready(function() {
-				run();
+				Ship = lightbulb.createModel("Ship", {name: lightbulb.types.String, color: lightbulb.types.String});
+				Container = lightbulb.createModel("Container", {owner: lightbulb.types.String, color: lightbulb.types.String});
+				Item = lightbulb.createModel("Item", {name: lightbulb.types.String, shape: lightbulb.types.String});
+
+				Ship.ready(function() {
+					Container.ready(function() {
+						Item.ready(function() {
+							run();
+						});
+					});
+				});
 			});
 	});
 });
@@ -77,6 +87,41 @@ describe('Document Factory (Create)', function() {
 			}, Error);
 		});
 	});
+	
+	describe('#hasMany()', function () {
+		it('should throw an error when given an undefined model', function () {
+			assert.throws(function() {
+				Ship.hasMany(undefined, "containers");
+			}, Error);
+		});
+
+		it('should throw an error when given anything but a string for the relation key', function () {
+			assert.throws(function() {
+				Ship.hasMany(Container, undefined);
+			}, Error);
+
+			assert.throws(function() {
+				Ship.hasMany(Container, 9);
+			}, Error);
+		});
+
+		it('should throw an error when given an empty string for the relation key', function () {
+			assert.throws(function() {
+				Ship.hasMany(Container, "");
+			}, Error);
+		});
+
+		it('should maintain a valid relation object when given a relation', function () {
+			Ship.hasMany(Container, "containers");
+			Container.hasMany(Item, "items");
+
+			assert.equal("hasMany", Ship.relationships["containers"].type);
+			assert.equal("hasMany", Container.relationships["items"].type);
+
+			assert.equal(Container, Ship.relationships["containers"].model);
+			assert.equal(Item, Container.relationships["items"].model);
+		});
+	});
 });
 
 describe('Document', function() {
@@ -133,9 +178,78 @@ describe('Document', function() {
 		it('should return the document with an id', function () {
 			var inst = new Apple({color: "red", type: "Fuji"});
 
-			inst.save().then(function(saved) {
+			return inst.save().then(function(saved) {
 				assert.notEqual(undefined, saved);
 				assert.notEqual(undefined, saved.id);
+			});
+		});
+		
+		it('should save all related documents with dual levels', function () {
+			var icecap = new Ship({name: "Ice Cap", color: "White"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Orange"});
+
+			return icecap.save().then(function(savedShip) {
+				savedShip.containers.appendDocument(c1);
+				savedShip.containers.appendDocument(c2);
+
+				return savedShip.save().then(function(containerizedShip) {
+					assert.notEqual(undefined, containerizedShip);
+					assert.notEqual(undefined, containerizedShip.id);
+					assert.equal("Ice Cap", containerizedShip.name);
+					assert.equal(2, containerizedShip.containers.length);
+					assert.equal("Fruit Sales Inc.", containerizedShip.containers[0].owner);
+					assert.equal("Fruit Sales Inc.", containerizedShip.containers[1].owner);
+				});
+			});
+		});
+
+		it('should save all related documents with many levels', function () {
+			var icecap = new Ship({name: "Ice Cap", color: "White"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Orange"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+
+			return icecap.save().then(function(savedShip) {
+				savedShip.containers.appendDocument(c1);
+				savedShip.containers.appendDocument(c2);
+
+				return savedShip.save().then(function(containerizedShip) {
+					containerizedShip.containers[0].items.appendDocument(peachBox);
+					containerizedShip.containers[1].items.appendDocument(peachBox);
+
+					return containerizedShip.save().then(function(peachShip) {
+						assert.notEqual(undefined, peachShip);
+						assert.notEqual(undefined, peachShip.id);
+						assert.equal("Ice Cap", peachShip.name);
+						assert.equal(2, peachShip.containers.length);
+						assert.equal("Fruit Sales Inc.", peachShip.containers[0].owner);
+						assert.equal("Fruit Sales Inc.", peachShip.containers[1].owner);
+						assert.equal("Box of Peaches", peachShip.containers[0].items[0].name);
+						assert.equal("Box of Peaches", peachShip.containers[1].items[0].name);
+					});
+				});
+			});
+		});
+
+		it('should save all related documents with many levels in a non-hierarchical fashinon', function () {
+			var icecap = new Ship({name: "Ice Cap", color: "White"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Orange"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+			
+			icecap.containers.appendDocument(c1);
+			icecap.containers.appendDocument(c2);
+			icecap.containers[0].items.appendDocument(peachBox);
+			icecap.containers[1].items.appendDocument(peachBox);
+
+			return icecap.save().then(function(savedShip) {
+				assert.notEqual(undefined, savedShip);
+				assert.notEqual(undefined, savedShip.id);
+				assert.equal("Ice Cap", savedShip.name);
+				assert.equal(2, savedShip.containers.length);
+				assert.equal("Fruit Sales Inc.", savedShip.containers[0].owner);
+				assert.equal("Fruit Sales Inc.", savedShip.containers[1].owner);
 			});
 		});
 
