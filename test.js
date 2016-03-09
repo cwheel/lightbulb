@@ -2,26 +2,27 @@ var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
 var DocumentSet = require('./lib/documentSet');
 
-var Apple, Orange, Ship, Container, Item;
+var Apple, Orange, Ship, Container, Item, getId;
 
 lightbulb.onConnected(function() {
 	Apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
-		Apple.ready(function() {
-			Orange = lightbulb.createModel("Orange", {weight: lightbulb.types.Number, origin: lightbulb.types.String});
-			
-			Orange.ready(function() {
-				Ship = lightbulb.createModel("Ship", {name: lightbulb.types.String, color: lightbulb.types.String});
-				Container = lightbulb.createModel("Container", {owner: lightbulb.types.String, color: lightbulb.types.String});
-				Item = lightbulb.createModel("Item", {name: lightbulb.types.String, shape: lightbulb.types.String});
 
-				Ship.ready(function() {
-					Container.ready(function() {
-						Item.ready(function() {
-							run();
-						});
+	Apple.ready(function() {
+		Orange = lightbulb.createModel("Orange", {weight: lightbulb.types.Number, origin: lightbulb.types.String});
+		
+		Orange.ready(function() {
+			Ship = lightbulb.createModel("Ship", {name: lightbulb.types.String, color: lightbulb.types.String});
+			Container = lightbulb.createModel("Container", {owner: lightbulb.types.String, color: lightbulb.types.String});
+			Item = lightbulb.createModel("Item", {name: lightbulb.types.String, shape: lightbulb.types.String});
+
+			Ship.ready(function() {
+				Container.ready(function() {
+					Item.ready(function() {
+						run();
 					});
 				});
 			});
+		});
 	});
 });
 
@@ -244,6 +245,8 @@ describe('Document', function() {
 			icecap.containers[1].items.appendDocument(peachBox);
 
 			return icecap.save().then(function(savedShip) {
+				getId = savedShip.id;
+
 				assert.notEqual(undefined, savedShip);
 				assert.notEqual(undefined, savedShip.id);
 				assert.equal("Ice Cap", savedShip.name);
@@ -266,7 +269,7 @@ describe('Document', function() {
 		it('should update a document if the document has an id', function () {
 			var inst = new Apple({color: "red", type: "Fuji"});
 
-			inst.save().then(function(saved) {
+			return inst.save().then(function(saved) {
 				saved.color = "yellow";
 
 				saved.save().then(function(nextSaved) {
@@ -296,7 +299,7 @@ describe('Document', function() {
 		});
 
 		it('should actually remove the document', function () {
-			inst1.remove(function(removed) {
+			return inst1.remove(function(removed) {
 				inst1.get(removed.id).then(function(fetched) {
 					assert.equal(undefined, fetched);
 				});
@@ -304,7 +307,7 @@ describe('Document', function() {
 		});
 
 		it('should return correct document upon removal', function () {
-			inst2.remove(function(removed) {
+			return inst2.remove(function(removed) {
 				assert.equal(3, removed.weight);
 				assert.equal("California", removed.origin);
 			});
@@ -326,21 +329,59 @@ describe('Document Factory (Fetch)', function() {
 
 	describe('#get()', function() {
 		it('should fetch a document given an id', function () {
-			Orange.get(id).then(function(doc) {
+			return Orange.get(id).then(function(doc) {
 				assert.notEqual(undefined, doc);
 			});
 		});
 
 		it('should fetch the specified document given an id', function () {
-			Orange.get(id).then(function(doc) {
+			return Orange.get(id).then(function(doc) {
 				assert.equal(1.5, doc.weight);
 				assert.equal("Chile", doc.origin);
+				assert.equal(id, doc.id);
 			});
 		});
 
 		it('should return undefined if the id is invalid', function () {
-			Orange.get('not-an-id').then(function(doc) {
+			return Orange.get('not-an-id').then(function(doc) {
 				assert.equal(undefined, doc);
+			});
+		});
+
+		it('should not fetch associated documents', function () {
+			return Ship.get(getId).then(function(doc) {
+				assert.throws(function() {
+					doc.containers[0].owner
+				}, Error);
+
+				assert.throws(function() {
+					doc.containers[0].owner
+				}, Error);
+
+				assert.equal(getId, doc.id);
+			});
+		});
+	});
+
+	describe('#getAll()', function() {
+		it('should fetch a document given an id', function () {
+			return Ship.getAll(getId).then(function(doc) {
+				assert.notEqual(undefined, doc);
+			});
+		});
+
+		it('should return undefined if the id is invalid', function () {
+			return Ship.getAll('not-an-id').then(function(doc) {
+				assert.equal(undefined, doc);
+			});
+		});
+
+		it('should fetch the specified document and related documents given an id', function () {
+			console.log("THE GET ID IS", getId);
+			return Ship.getAll(getId).then(function(doc) {
+				console.log(doc);
+
+
 			});
 		});
 	});
@@ -357,13 +398,13 @@ describe('Document Factory (Fetch)', function() {
 		});
 		
 		it('should fetch a document set', function () {
-			Orange.find({origin: "Florida"}).then(function(set) {
+			return Orange.find({origin: "Florida"}).then(function(set) {
 				assert.notEqual(undefined, set);
 			});
 		});
 
 		it('should fetch a document set matching the filter', function () {
-			Orange.find({origin: "Florida"}).then(function(set) {
+			return Orange.find({origin: "Florida"}).then(function(set) {
 				set.forEach(function(item) {
 					assert.equal("Florida", item.origin);
 				});
@@ -371,7 +412,7 @@ describe('Document Factory (Fetch)', function() {
 		});
 
 		it('should return empty set with invalid filter', function () {
-			Orange.find({weight: 25}).then(function(set) {
+			return Orange.find({weight: 25}).then(function(set) {
 				assert.equal(0, set.length);
 			});
 		});
