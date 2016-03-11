@@ -2,7 +2,8 @@ var assert = require('assert');
 var lightbulb = require('./lib/lightbulb')({db: 'test'});
 var DocumentSet = require('./lib/documentSet');
 
-var Apple, Orange, Ship, Container, Item, getId;
+var Apple, Orange, Ship, Container, Item;
+var getId = "986d200d-0684-40dc-a20b-51407be8d14e";
 
 lightbulb.onConnected(function() {
 	Apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
@@ -376,14 +377,11 @@ describe('Document Factory (Fetch)', function() {
 			});
 		});
 
-		it('should fetch the specified document and related documents given an id', function () {
-			console.log("THE GET ID IS", getId);
+	/*	it('should fetch the specified document and related documents given an id', function () {
 			return Ship.getAll(getId).then(function(doc) {
 				console.log(doc);
-
-
 			});
-		});
+		});*/
 	});
 
 	describe('#find()', function() {
