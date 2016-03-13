@@ -3,7 +3,7 @@ var lightbulb = require('./lib/lightbulb')({db: 'test'});
 var DocumentSet = require('./lib/documentSet');
 
 var Apple, Orange, Ship, Container, Item;
-var getId = "986d200d-0684-40dc-a20b-51407be8d14e";
+var getId = "0da15f76-c831-4ee6-af47-a0f894d77c79";
 
 lightbulb.onConnected(function() {
 	Apple = lightbulb.createModel("Apple", {color: lightbulb.types.String, type: lightbulb.types.String});
@@ -246,8 +246,6 @@ describe('Document', function() {
 			icecap.containers[1].items.appendDocument(peachBox);
 
 			return icecap.save().then(function(savedShip) {
-				getId = savedShip.id;
-
 				assert.notEqual(undefined, savedShip);
 				assert.notEqual(undefined, savedShip.id);
 				assert.equal("Ice Cap", savedShip.name);
@@ -377,11 +375,11 @@ describe('Document Factory (Fetch)', function() {
 			});
 		});
 
-	/*	it('should fetch the specified document and related documents given an id', function () {
+	  	it('should fetch the specified document and related documents given an id', function () {
 			return Ship.getAll(getId).then(function(doc) {
 				console.log(doc);
 			});
-		});*/
+		});
 	});
 
 	describe('#find()', function() {

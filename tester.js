@@ -1,4 +1,4 @@
-var lightbulb = require('./lib/lightbulb')({db: 'tester1'});
+var lightbulb = require('./lib/lightbulb')({db: 'test'});
 var DocumentSet = require('./lib/documentSet.js');
 /*
 lightbulb.onConnected(function() {
@@ -37,22 +37,8 @@ lightbulb.onConnected(function() {
 			Container.hasMany(Item, "items");
 
 			Ship.ready(function() {
-				var icecap = new Ship({name: "Ice Cap", color: "White"});
-				var c1 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
-				var c2 = new Container({owner: "Fruit Sales Inc.", color: "Orange"});
-				var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
-				
-				icecap.containers.appendDocument(c1);
-				icecap.containers.appendDocument(c2);
-				icecap.containers[0].items.appendDocument(peachBox);
-				icecap.containers[1].items.appendDocument(peachBox);
-
-			 	icecap.save().then(function(savedShip) {
-			 		console.log(savedShip);
-
-					Ship.getAll(savedShip.id).then(function(saved) {
-						console.log(saved);
-					});
+				Ship.getAll("0da15f76-c831-4ee6-af47-a0f894d77c79").then(function(doc) {
+					console.log("doc", doc);
 				});
 			});
 		});
