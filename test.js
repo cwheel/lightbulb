@@ -363,8 +363,27 @@ describe('Document Factory (Fetch)', function() {
 	});
 
 	describe('#getAll()', function() {
+		var id;
+
+		before(function(done) {
+			var pw = new Ship({name: "Polar Wind", color: "Blue"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Green"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+			
+			pw.containers.appendDocument(c1);
+			pw.containers.appendDocument(c2);
+			pw.containers[0].items.appendDocument(peachBox);
+			pw.containers[1].items.appendDocument(peachBox);
+
+			return pw.save().then(function(savedShip) {
+				id = savedShip.id;
+				done();
+			});
+		});
+
 		it('should fetch a document given an id', function () {
-			return Ship.getAll(getId).then(function(doc) {
+			return Ship.getAll(id).then(function(doc) {
 				assert.notEqual(undefined, doc);
 			});
 		});
@@ -376,8 +395,13 @@ describe('Document Factory (Fetch)', function() {
 		});
 
 	  	it('should fetch the specified document and related documents given an id', function () {
-			return Ship.getAll(getId).then(function(doc) {
-				console.log(doc);
+			return Ship.getAll(id).then(function(doc) {
+				assert.notEqual(undefined, doc);
+				assert.notEqual(undefined, doc.id);
+				assert.equal("Polar Wind", doc.name);
+				assert.equal(2, doc.containers.length);
+				assert.equal("Fruit Sales Inc.", doc.containers[0].owner);
+				assert.equal("Fruit Sales Inc.", doc.containers[1].owner);
 			});
 		});
 	});
