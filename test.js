@@ -423,6 +423,14 @@ describe('Document Factory (Fetch)', function() {
 	});
 
 	describe('#find()', function() {
+		before(function(done) {
+			var inst = new Orange({weight: 2.3, origin: "Florida"});
+
+			inst.save().then(function(saved) {
+				done();
+			});
+		});
+
 		it('should throw an error when given an undefined filter', function () {
 			assert.throws(function() {
 				Orange.find();
