@@ -236,7 +236,7 @@ describe('Document', function() {
 			});
 		});
 
-		it('should save all related documents with many levels in a non-hierarchical fashinon', function () {
+		it('should save all related documents with many levels in a non-hierarchical fashion', function () {
 			var icecap = new Ship({name: "Ice Cap", color: "White"});
 			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
 			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Orange"});
@@ -317,14 +317,28 @@ describe('Document', function() {
 });
 
 describe('Document Factory (Fetch)', function() {
-	var id;
+	var id, deepId;
 
 	before(function(done) {
 		var inst = new Orange({weight: 1.5, origin: "Chile"});
 
 		inst.save().then(function(saved) {
 			id = saved.id;
-			done();
+
+			var pw = new Ship({name: "Polar Wind", color: "Blue"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Green"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+			
+			pw.containers.appendDocument(c1);
+			pw.containers.appendDocument(c2);
+			pw.containers[0].items.appendDocument(peachBox);
+			pw.containers[1].items.appendDocument(peachBox);
+
+			return pw.save().then(function(savedShip) {
+				deepId = savedShip.id;
+				done();
+			});
 		});
 	});
 
@@ -350,7 +364,7 @@ describe('Document Factory (Fetch)', function() {
 		});
 
 		it('should not fetch associated documents', function () {
-			return Ship.get(getId).then(function(doc) {
+			return Ship.get(deepId).then(function(doc) {
 				assert.throws(function() {
 					doc.containers[0].owner
 				}, Error);
@@ -359,7 +373,7 @@ describe('Document Factory (Fetch)', function() {
 					doc.containers[0].owner
 				}, Error);
 
-				assert.equal(getId, doc.id);
+				assert.equal(deepId, doc.id);
 			});
 		});
 	});
