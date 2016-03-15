@@ -425,14 +425,59 @@ describe('Document Factory (Fetch)', function() {
 
 		it('should fetch a document set matching the filter', function () {
 			return Orange.find({origin: "Florida"}).then(function(set) {
-				set.forEach(function(item) {
-					assert.equal("Florida", item.origin);
-				});
+				assert.equal("Florida", set[0].origin);
 			});
 		});
 
 		it('should return empty set with invalid filter', function () {
 			return Orange.find({weight: 25}).then(function(set) {
+				assert.equal(0, set.length);
+			});
+		});
+	});
+
+	describe('#findAll()', function() {
+		before(function(done) {
+			var pw = new Ship({name: "Polar Wind", color: "Blue"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Green"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+			
+			pw.containers.appendDocument(c1);
+			pw.containers.appendDocument(c2);
+			pw.containers[0].items.appendDocument(peachBox);
+			pw.containers[1].items.appendDocument(peachBox);
+
+			return pw.save().then(function(savedShip) {
+				done();
+			});
+		});
+
+		it('should throw an error when given an undefined filter', function () {
+			assert.throws(function() {
+				Ship.findAll();
+			});
+
+			assert.throws(function() {
+				Ship.findAll(undefined);
+			});
+		});
+		
+		it('should fetch a document set', function () {
+			return Ship.findAll({name: "Polar Wind"}).then(function(set) {
+				assert.notEqual(undefined, set);
+			});
+		});
+
+		it('should fetch a document set matching the filter', function () {
+			return Ship.findAll({name: "Polar Wind"}).then(function(set) {
+				assert.equal("Polar Wind", set[0].name);
+				assert.equal(2, set[0].containers.length);
+			});
+		});
+
+		it('should return empty set with invalid filter', function () {
+			return Ship.find({name: "The Explorer"}).then(function(set) {
 				assert.equal(0, set.length);
 			});
 		});
