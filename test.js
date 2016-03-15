@@ -13,11 +13,13 @@ lightbulb.onConnected(function() {
 		
 		Orange.ready(function() {
 			Ship = lightbulb.createModel("Ship", {name: lightbulb.types.String, color: lightbulb.types.String});
-			Container = lightbulb.createModel("Container", {owner: lightbulb.types.String, color: lightbulb.types.String});
-			Item = lightbulb.createModel("Item", {name: lightbulb.types.String, shape: lightbulb.types.String});
 
 			Ship.ready(function() {
+				Container = lightbulb.createModel("Container", {owner: lightbulb.types.String, color: lightbulb.types.String});
+			
 				Container.ready(function() {
+					Item = lightbulb.createModel("Item", {name: lightbulb.types.String, shape: lightbulb.types.String});
+
 					Item.ready(function() {
 						run();
 					});
@@ -477,7 +479,7 @@ describe('Document Factory (Fetch)', function() {
 		});
 
 		it('should return empty set with invalid filter', function () {
-			return Ship.find({name: "The Explorer"}).then(function(set) {
+			return Ship.findAll({name: "The Explorer"}).then(function(set) {
 				assert.equal(0, set.length);
 			});
 		});
@@ -499,6 +501,53 @@ describe('Document Factory (Fetch)', function() {
 
 		it('should return undefined with invalid filter', function () {
 			Orange.findOne({weight: 25}).then(function(doc) {
+				assert.equal(undefined, doc);
+			});
+		});
+	});
+
+	describe('#findOneAll()', function() {
+		before(function(done) {
+			var pw = new Ship({name: "Polar Wind", color: "Blue"});
+			var c1 = new Container({owner: "Fruit Sales Inc.", color: "Green"});
+			var c2 = new Container({owner: "Fruit Sales Inc.", color: "Red"});
+			var peachBox = new Item({name: "Box of Peaches", shape: "Rectangle"});
+			
+			pw.containers.appendDocument(c1);
+			pw.containers.appendDocument(c2);
+			pw.containers[0].items.appendDocument(peachBox);
+			pw.containers[1].items.appendDocument(peachBox);
+
+			return pw.save().then(function(savedShip) {
+				done();
+			});
+		});
+
+		it('should throw an error when given an undefined filter', function () {
+			assert.throws(function() {
+				Ship.findOneAll();
+			});
+
+			assert.throws(function() {
+				Ship.findOneAll(undefined);
+			});
+		});
+		
+		it('should fetch a document set', function () {
+			return Ship.findOneAll({name: "Polar Wind"}).then(function(doc) {
+				assert.notEqual(undefined, doc);
+			});
+		});
+
+		it('should fetch a document set matching the filter', function () {
+			return Ship.findOneAll({name: "Polar Wind"}).then(function(doc) {
+				assert.equal("Polar Wind", doc.name);
+				assert.equal(undefined, doc.appendDocument);
+			});
+		});
+
+		it('should return empty set with invalid filter', function () {
+			return Ship.findOneAll({name: "The Explorer"}).then(function(doc) {
 				assert.equal(undefined, doc);
 			});
 		});
